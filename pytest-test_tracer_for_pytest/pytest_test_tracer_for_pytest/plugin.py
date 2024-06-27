@@ -18,25 +18,27 @@ class TestTracerPlugin:
     name = "Test Tracer for Pytest"
 
     def __init__(self, config):
-        self.test_data = {}
         log_level = logging.DEBUG if config.option.verbose > 1 else logging.INFO
         logging.basicConfig(level=log_level)
         self.logger = logging.getLogger(self.name)
+        self.__validate_arguments(config)
+        self.test_data = {}
         self.__reset_results_folder()
 
     # hooks
 
     def pytest_sessionfinish(self, session):
+        if not self.enabled:
+            return
+
         self.__zip_results()
 
-        if session.config.getoption("--test-tracer-upload-results") == "True":
-            token = session.config.getoption("--test-tracer-upload-token")
-
-            self.__upload_results(token)
-            self.__process_results(token)
+        if self.should_upload_results == True:
+            self.__upload_results()
+            self.__process_results()
         else:
             self.logger.debug(
-                "Not uploading results as the --test-tracer-upload-results flag is False"
+                "Not uploading results as the --test-tracer-no-upload argument was used"
             )
 
     @pytest.mark.hookwrapper
@@ -58,7 +60,48 @@ class TestTracerPlugin:
 
     # end hooks
 
+    def __validate_arguments(self, config):
+        self.enabled = config.getoption("--use-test-tracer")
+
+        if self.enabled == False:
+            self.logger.debug(
+                "Test Tracer is not enabled. Add the --use-test-tracer argument to enable it"
+            )
+            return
+
+        self.run_reference = config.getoption("--test-tracer-run-reference")
+        self.build_version = config.getoption("--build-version")
+        self.build_revision = config.getoption("--build-revision")
+
+        if self.build_revision is None:
+            raise ValueError("Test Tracer requires a --build-revision argument")
+
+        self.project_name = config.getoption("--test-tracer-project-name")
+
+        if self.project_name is None:
+            raise ValueError(
+                "Test Tracer requires a --test-tracer-project-name argument"
+            )
+
+        self.branch_name = config.getoption("--branch-name")
+
+        if self.branch_name is None:
+            raise ValueError("Test Tracer requires a --branch-name argument")
+
+        self.should_upload_results = (
+            config.getoption("--test-tracer-no-upload") == False
+        )
+        self.upload_token = config.getoption("--test-tracer-upload-token")
+
+        if self.upload_token is None and self.should_upload_results:
+            raise ValueError(
+                "You must provide a --test-tracer-upload-token argument in order to upload results"
+            )
+
     def __reset_results_folder(self):
+        if not self.enabled:
+            return
+
         self.logger.debug("Create empty test_tracer folder")
         shutil.rmtree(
             self.TEST_TRACER_RESULTS_PATH,
@@ -73,18 +116,20 @@ class TestTracerPlugin:
             for file in glob.glob(f"{self.TEST_TRACER_RESULTS_PATH}/*.json"):
                 f.write(file)
 
-    def __upload_results(self, token):
+    def __upload_results(self):
         self.logger.info("Uploading results to Test Tracer...")
         self.__make_request(
-            token,
+            self.upload_token,
             f"{self.TEST_TRACER_BASE_URL}/api/test-data/upload",
             {"file": open(f"{self.TEST_TRACER_RESULTS_PATH}/results.zip", "rb")},
         )
 
-    def __process_results(self, token):
+    def __process_results(self):
         self.logger.info("Processing results on Test Tracer...")
         self.__make_request(
-            token, f"{self.TEST_TRACER_BASE_URL}/api/test-data/process", None
+            self.upload_token,
+            f"{self.TEST_TRACER_BASE_URL}/api/test-data/process",
+            None,
         )
 
     def __make_request(self, token, url, files):
@@ -99,6 +144,9 @@ class TestTracerPlugin:
             files=files,
         )
 
+        if response.status_code >= 200 and response.status_code < 400:
+            return
+
         if response.status_code == 401:
             self.logger.fatal(
                 "Failed to authenticate with Test Tracer.  Ensure that your API Token is valid"
@@ -107,8 +155,15 @@ class TestTracerPlugin:
             self.logger.fatal(
                 "Your API Token does not have permission to upload results"
             )
+        else:
+            self.logger.warn(
+                f"Test Tracer responded with a {response.status_code} status code. It will be back up and running soon"
+            )
 
     def save_test_report(self, item: pytest.Item, call, outcome):
+        if not self.enabled:
+            return
+
         result = outcome.get_result()
 
         # write the failure information if the test failed
@@ -163,14 +218,12 @@ class TestTracerPlugin:
         if "uniqueName" not in self.test_data["feature"]:
             self.test_data["feature"]["uniqueName"] = item.parent.nodeid
 
-        self.test_data["externalReference"] = item.config.getoption(
-            "--test-tracer-run-reference"
-        )
+        self.test_data["externalReference"] = self.run_reference
         self.test_data["machineName"] = socket.gethostname()
-        self.test_data["buildVersion"] = item.config.getoption("--build-version")
-        self.test_data["buildRevision"] = item.config.getoption("--build-revision")
-        self.test_data["branch"] = item.config.getoption("--branch-name")
-        self.test_data["project"] = item.config.getoption("--test-tracer-project-name")
+        self.test_data["buildVersion"] = self.build_version
+        self.test_data["buildRevision"] = self.build_revision
+        self.test_data["branch"] = self.branch_name
+        self.test_data["project"] = self.project_name
         self.test_data["testCaseRunId"] = str(uuid.uuid4())
 
         if "metadata" not in self.test_data:
