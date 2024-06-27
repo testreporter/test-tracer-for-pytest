@@ -3,6 +3,7 @@ README.rst
 pyproject.toml
 setup.py
 pytest_test_tracer_for_pytest/__init__.py
+pytest_test_tracer_for_pytest/constants.py
 pytest_test_tracer_for_pytest/hooks.py
 pytest_test_tracer_for_pytest/plugin.py
 pytest_test_tracer_for_pytest.egg-info/PKG-INFO

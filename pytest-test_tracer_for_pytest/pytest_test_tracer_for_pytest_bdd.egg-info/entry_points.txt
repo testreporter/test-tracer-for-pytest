@@ -1,2 +1,0 @@
-[pytest11]
-test-tracer-for-pytest = pytest_test_tracer_for_pytest.plugin
