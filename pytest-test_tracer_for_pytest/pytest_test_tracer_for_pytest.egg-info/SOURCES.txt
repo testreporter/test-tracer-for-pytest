@@ -12,3 +12,4 @@ pytest_test_tracer_for_pytest.egg-info/entry_points.txt
 pytest_test_tracer_for_pytest.egg-info/requires.txt
 pytest_test_tracer_for_pytest.egg-info/top_level.txt
 tests/test_test_tracer_for_pytest.py
+tests/test_test_tracer_for_pytest_bdd.py
