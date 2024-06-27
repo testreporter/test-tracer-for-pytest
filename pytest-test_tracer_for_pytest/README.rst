@@ -51,6 +51,10 @@ Install the Plugin then activate it using the following Pytest parameters
      - No
      - By default, Test Tracer Runs are grouped one per Pytest run. If you want multiple Pytest runs to be visible in the same Test Tracer Run, you can specify your own unique run reference. Useful if you split up your test runs into several parallel runs
      - A GUID
+   * - use-test-tracer
+     - No
+     - Provide this argument to enable the Test Tracer plugin
+     - False
    * - build-version
      - No
      - If your application under test has a build version. You can enter it here.
@@ -67,10 +71,10 @@ Install the Plugin then activate it using the following Pytest parameters
      - Yes
      - The name of the branch that is being tested
      - None
-   * - test-tracer-upload-results
+   * - test-tracer-no-upload
      - No
-     - If you set this to false, Test Tracer will still generate test result data, but it won't attempt to upload it to Test Tracer
-     - True
+     - If you provide this argument, Test Tracer will still generate test result data, but it won't attempt to upload it to Test Tracer
+     - False
    * - test-tracer-upload-token
      - No
      - If you want to upload results to Test Tracer, you need to specify the API token used to secure the upload
