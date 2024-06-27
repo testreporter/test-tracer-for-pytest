@@ -1,5 +1,6 @@
 import uuid
 from .plugin import TestTracerPlugin
+from .constants import constants
 
 
 def pytest_configure(config):
@@ -9,7 +10,7 @@ def pytest_configure(config):
 def pytest_addoption(parser):
     params = parser.getgroup("Test Tracer")
     params.addoption(
-        "--test-tracer-run-reference",
+        constants.ARG_RUN_REFERENCE,
         action="store",
         default=str(uuid.uuid4()),
         required=False,
@@ -17,46 +18,46 @@ def pytest_addoption(parser):
     )
 
     params.addoption(
-        "--build-version",
+        constants.ARG_BUILD_VERSION,
         action="store",
         default=None,
         required=False,
         help="The version of the application under test",
     )
     params.addoption(
-        "--build-revision",
+        constants.ARG_BUILD_REVISION,
         action="store",
         required=False,
         help="The revision of the application under test",
     )
     params.addoption(
-        "--test-tracer-project-name",
+        constants.ARG_PROJECT_NAME,
         action="store",
         required=False,
         help="The name of the project of application under test",
     )
     params.addoption(
-        "--branch-name",
+        constants.ARG_BRANCH_NAME,
         action="store",
         required=False,
         help="The name of the branch that is under test",
     )
     params.addoption(
-        "--test-tracer-no-upload",
+        constants.ARG_NO_UPLOAD,
         action="store_true",
         required=False,
         default=False,
         help="Whether to upload results to Test Tracer when finished",
     )
     params.addoption(
-        "--use-test-tracer",
+        constants.ARG_USE_TEST_TRACER,
         action="store_true",
         required=False,
         default=False,
         help="Whether you want to enable the Test Tracer plugin",
     )
     params.addoption(
-        "--test-tracer-upload-token",
+        constants.ARG_UPLOAD_TOKEN,
         action="store",
         required=False,
         help="The API token used to authenticate when uploading results",

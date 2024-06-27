@@ -9,11 +9,10 @@ import zipfile
 import pytest
 import requests
 import logging
+from .constants import constants
 
 
 class TestTracerPlugin:
-    TEST_TRACER_RESULTS_PATH = "./test_tracer"
-    TEST_TRACER_BASE_URL = "https://api.testtracer.io"
     test_data = {}
     name = "Test Tracer for Pytest"
 
@@ -38,7 +37,7 @@ class TestTracerPlugin:
             self.__process_results()
         else:
             self.logger.debug(
-                "Not uploading results as the --test-tracer-no-upload argument was used"
+                f"Not uploading results as the {constants.ARG_NO_UPLOAD} argument was used"
             )
 
     @pytest.mark.hookwrapper
@@ -61,41 +60,43 @@ class TestTracerPlugin:
     # end hooks
 
     def __validate_arguments(self, config):
-        self.enabled = config.getoption("--use-test-tracer")
+        self.enabled = config.getoption(constants.ARG_USE_TEST_TRACER)
 
         if self.enabled == False:
             self.logger.debug(
-                "Test Tracer is not enabled. Add the --use-test-tracer argument to enable it"
+                f"Test Tracer is not enabled. Add the {constants.ARG_USE_TEST_TRACER} argument to enable it"
             )
             return
 
-        self.run_reference = config.getoption("--test-tracer-run-reference")
-        self.build_version = config.getoption("--build-version")
-        self.build_revision = config.getoption("--build-revision")
+        self.run_reference = config.getoption(constants.ARG_RUN_REFERENCE)
+        self.build_version = config.getoption(constants.ARG_BUILD_VERSION)
+        self.build_revision = config.getoption(constants.ARG_BUILD_REVISION)
 
         if self.build_revision is None:
-            raise ValueError("Test Tracer requires a --build-revision argument")
+            raise ValueError(
+                f"Test Tracer requires a {constants.ARG_BUID_REVISION} argument"
+            )
 
-        self.project_name = config.getoption("--test-tracer-project-name")
+        self.project_name = config.getoption(constants.ARG_PROJECT_NAME)
 
         if self.project_name is None:
             raise ValueError(
-                "Test Tracer requires a --test-tracer-project-name argument"
+                f"Test Tracer requires a {constants.ARG_PROJECT_NAME} argument"
             )
 
-        self.branch_name = config.getoption("--branch-name")
+        self.branch_name = config.getoption(constants.ARG_BRANCH_NAME)
 
         if self.branch_name is None:
-            raise ValueError("Test Tracer requires a --branch-name argument")
+            raise ValueError(
+                f"Test Tracer requires a {constants.ARG_BRANCH_NAME} argument"
+            )
 
-        self.should_upload_results = (
-            config.getoption("--test-tracer-no-upload") == False
-        )
-        self.upload_token = config.getoption("--test-tracer-upload-token")
+        self.should_upload_results = config.getoption(constants.ARG_NO_UPLOAD) == False
+        self.upload_token = config.getoption(constants.ARG_UPLOAD_TOKEN)
 
         if self.upload_token is None and self.should_upload_results:
             raise ValueError(
-                "You must provide a --test-tracer-upload-token argument in order to upload results"
+                f"You must provide a {constants.ARG_UPLOAD_TOKEN} argument in order to upload results"
             )
 
     def __reset_results_folder(self):
@@ -104,38 +105,40 @@ class TestTracerPlugin:
 
         self.logger.debug("Create empty test_tracer folder")
         shutil.rmtree(
-            self.TEST_TRACER_RESULTS_PATH,
+            constants.TEST_TRACER_RESULTS_PATH,
         )
-        Path(self.TEST_TRACER_RESULTS_PATH).mkdir(exist_ok=True)
+        Path(constants.TEST_TRACER_RESULTS_PATH).mkdir(exist_ok=True)
 
     def __zip_results(self):
         """
         Compress all the result .json files into a zip file, ready for uploading
         """
-        with zipfile.ZipFile(f"{self.TEST_TRACER_RESULTS_PATH}/results.zip", "w") as f:
-            for file in glob.glob(f"{self.TEST_TRACER_RESULTS_PATH}/*.json"):
+        with zipfile.ZipFile(
+            f"{constants.TEST_TRACER_RESULTS_PATH}/results.zip", "w"
+        ) as f:
+            for file in glob.glob(f"{constants.TEST_TRACER_RESULTS_PATH}/*.json"):
                 f.write(file)
 
     def __upload_results(self):
         self.logger.info("Uploading results to Test Tracer...")
         self.__make_request(
             self.upload_token,
-            f"{self.TEST_TRACER_BASE_URL}/api/test-data/upload",
-            {"file": open(f"{self.TEST_TRACER_RESULTS_PATH}/results.zip", "rb")},
+            f"{constants.TEST_TRACER_BASE_URL}/api/test-data/upload",
+            {"file": open(f"{constants.TEST_TRACER_RESULTS_PATH}/results.zip", "rb")},
         )
 
     def __process_results(self):
         self.logger.info("Processing results on Test Tracer...")
         self.__make_request(
             self.upload_token,
-            f"{self.TEST_TRACER_BASE_URL}/api/test-data/process",
+            f"{constants.TEST_TRACER_BASE_URL}/api/test-data/process",
             None,
         )
 
     def __make_request(self, token, url, files):
         if token is None:
             raise ValueError(
-                "You must provide a --test-tracer-upload-token parameter in order to upload results"
+                f"You must provide a {constants.ARG_UPLOAD_TOKEN} parameter in order to upload results"
             )
 
         response = requests.post(
@@ -230,6 +233,6 @@ class TestTracerPlugin:
             self.test_data["metadata"] = []
 
         with open(
-            f"{self.TEST_TRACER_RESULTS_PATH}/{uuid.uuid4()}.json", "w"
+            f"{constants.TEST_TRACER_RESULTS_PATH}/{uuid.uuid4()}.json", "w"
         ) as outfile:
             outfile.write(json.dumps(self.test_data))
