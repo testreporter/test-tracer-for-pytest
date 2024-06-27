@@ -27,7 +27,7 @@ License:
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
         THE SOFTWARE.
         
-Project-URL: Repository, https://github.com/Gavlarqa/pytest-test_tracer_for_pytest
+Project-URL: Repository, https://github.com/testreporter/test-tracer-for-pytest
 Classifier: Framework :: Pytest
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
