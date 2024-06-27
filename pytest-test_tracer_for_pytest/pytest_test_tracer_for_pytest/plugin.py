@@ -97,7 +97,6 @@ class TestTracerPlugin:
             url,
             headers={"x-api-key": token, "Accept-Encoding": "gzip, deflate"},
             files=files,
-            verify=False,
         )
 
         if response.status_code == 401:
