@@ -9,7 +9,7 @@ import zipfile
 import pytest
 import requests
 import logging
-from .constants import constants
+from . import constants
 
 
 class TestTracerPlugin:

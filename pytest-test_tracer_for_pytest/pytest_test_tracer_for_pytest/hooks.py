@@ -1,6 +1,6 @@
 import uuid
 from .plugin import TestTracerPlugin
-from .constants import constants
+from . import constants
 
 
 def pytest_configure(config):
