@@ -1,0 +1,10 @@
+site_name: pytest-test-tracer-for-pytest
+site_description: A plugin that allows collecting test data for use on Test Tracer
+site_author: Gavin Clark
+
+theme: readthedocs
+
+repo_url: https://github.com/testreporter/test-tracer-for-pytest
+
+pages:
+  - Home: index.md
