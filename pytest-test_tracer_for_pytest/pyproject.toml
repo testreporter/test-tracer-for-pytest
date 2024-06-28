@@ -11,10 +11,10 @@ version = "0.1.0"
 readme = "README.rst"
 requires-python = ">=3.8"
 authors = [
-    { name = "Gavin Clark", email = "gavinclark395@hotmail.com" },
+    { name = "Gavin Clark", email = "testtracer.io@gmail.com" },
 ]
 maintainers = [
-    { name = "Gavin Clark", email = "gavinclark395@hotmail.com" },
+    { name = "Gavin Clark", email = "testtracer.io@gmail.com" },
 ]
 license = {file = "LICENSE"}
 classifiers = [

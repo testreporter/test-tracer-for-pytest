@@ -2,8 +2,8 @@ Metadata-Version: 2.1
 Name: pytest-test_tracer_for_pytest
 Version: 0.1.0
 Summary: A plugin that allows coll test data for use on Test Tracer
-Author-email: Gavin Clark <gavinclark395@hotmail.com>
-Maintainer-email: Gavin Clark <gavinclark395@hotmail.com>
+Author-email: Gavin Clark <testtracer.io@gmail.com>
+Maintainer-email: Gavin Clark <testtracer.io@gmail.com>
 License: 
         The MIT License (MIT)
         
