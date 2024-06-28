@@ -74,7 +74,7 @@ class TestTracerPlugin:
 
         if self.build_revision is None:
             raise ValueError(
-                f"Test Tracer requires a {constants.ARG_BUID_REVISION} argument"
+                f"Test Tracer requires a {constants.ARG_BUILD_REVISION} argument"
             )
 
         self.project_name = config.getoption(constants.ARG_PROJECT_NAME)
